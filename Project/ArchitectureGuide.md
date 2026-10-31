@@ -4,16 +4,22 @@
 
 ## Introduction
 
-*Ce guide va utiliser le [projet de référence](https://github.com/HeartBeat-Games/Imperative-Programming-CPP) comme code d'origine. Je vous encourage à vous en inspirer un maximun, mais vous pouvez vous limiter à votre ancien code.*
-La première question que vous pouvez vous poser : **que doit faire mon programme et à quoi va ressembler la structure globale ?**. Cette question j'y ai répondu pour vous avec le diagramme de base et les indications supplémentaires. Vous savez donc que vous allez vouloir faire un **Jeu avec une game loop tour par tour : Joueur => Ennemi**, sur une **Map représentée par une grille avec différent type (int) de cellules**, le tout parcourus par un **Player** et des **Enemy** qui ont l'air d'avoir une structure logique commune importante (par exemple ils se déplacent tous sur la carte). On pourrait donc leur faire une classe parent **Entity** et s'arrêter là pour une première étape. Mais pour ne pas faire un guide encore plus long, on va ajouter tout de suite les "spécialisations" de **Player** (**Warrior** et **Mage**) et de **Enemy** (**Zombie** et **HeadlessZombie**). Pour le **WarriorMage** et le **ZombieSwimmer** ont les laisse de côté pour la première étape et on reviendra en détails sur chacun d'entre eux.
+*Ce guide va utiliser le [projet de référence](https://github.com/HeartBeat-Games/Imperative-Programming-CPP) comme code d'origine. Je vous encourage à vous en inspirer un maximum, mais vous pouvez vous limiter à votre ancien code.*
 
+La première question que vous pouvez vous poser : **que doit faire mon programme et à quoi va ressembler la structure globale ?**. Cette question j'y ai répondu pour vous avec le diagramme de base et les indications supplémentaires. Vous savez donc que vous allez vouloir faire un **Jeu avec une game loop tour par tour : Joueur => Ennemi**, sur une **Map représentée par une grille avec différent type (int) de cellules**, le tout parcourus par un **Player** et des **Enemy** qui ont l'air d'avoir une structure logique commune importante (par exemple ils se déplacent tous sur la carte).
+
+On pourrait donc leur faire une classe parent **Entity** et s'arrêter là pour une première étape. Mais pour ne pas faire un guide encore plus long, on va ajouter tout de suite les "spécialisations" de **Player** (**Warrior** et **Mage**) et de **Enemy** (**Zombie** et **HeadlessZombie**). Pour le **WarriorMage** et le **ZombieSwimmer** ont les laisse de côté pour la première étape et on reviendra en détails sur chacun d'entre eux.
 
 ---
-Si jamais vous n'accrochez pas avec l'exercice de réfléchir un peu à la strucutre du code en amont : **ce n'est pas grave**. Vous pouvez toujours implémenter les classes petit à petit, en commencant par les classes "finales" (évitez **WarriorMage** et **ZombieSwimmer**). Une fois que vous aurez, par exemple, **Warrior** et que vous ferez **Mage** vous remarquerez le code commun et vous "n'aurez plus qu'à" le réunir dans la classe **Player** et en faire hériter **Warrior** et **Mage**.
+
+Si jamais vous n'accrochez pas avec l'exercice de réfléchir un peu à la structure du code en amont : **ce n'est pas grave**. Vous pouvez toujours implémenter les classes petit à petit, en commençant par les classes "finales" (évitez **WarriorMage** et **ZombieSwimmer**). Une fois que vous aurez, par exemple, **Warrior** et que vous ferez **Mage** vous remarquerez le code commun et vous "n'aurez plus qu'à" le réunir dans la classe **Player** et en faire hériter **Warrior** et **Mage**.
+
+Vous pouvez même commencer avec **Player** et **Enemy**.
 
 ## Utilities
 
-Avant de commencer je réintroduis mon ami le **Vector2**, qui est juste l'aggloméra de deux nombres **x** et **y**.
+Avant de commencer je réintroduis mon ami le **Vector2**, qui est juste l'agglomérat de deux nombres **x** et **y**.
+
 ```mermaid
 
 classDiagram
@@ -30,7 +36,7 @@ classDiagram
     
 ```
 
-En plus de répuire le nombre de paramètres de vos functions, il est également possible en C++ de charger le comportement des opérateurs +,-,=, ==... Ce qui vous permetra d'écrire des choses du genre :
+En plus de réduire le nombre de paramètres de vos fonctions, il est également possible en C++ de changer le comportement des opérateurs +,-,=, ==... Ce qui vous permettra d'écrire des choses du genre :
 
 ```cpp
 Vector2 newPos = player.pos + dir;
@@ -41,7 +47,9 @@ Je vous encourage donc très fortement à faire au moins cette classe/struct **V
 
 ## Game et Map
 
-Pour cette première partie je vais donner pas mal de détail (non exhaustif quand même) sur la structure comme vous avez le code. Ici on utilise un tableau à une seule dimension pour représenter la grille, mais un tableau 2 dimensions ne change rien à la logique. La différence principale avec le code de beaucoup d'entre vous, c'est le tableau qui contient les metadata/informations pour chaque type de cellule. Et justement, le int dans int* cells,  correspond à l'index de ce tableau. Donc si j'ai 0 (Ground) dans `cells[index]` alors je peux récuprer les informations avec `tileInfo[0]`.
+Pour cette première partie je vais donner pas mal de détails (non exhaustif quand même) sur la structure comme vous avez le code.
+
+Ici on utilise un tableau à une seule dimension pour représenter la grille, mais un tableau 2 dimensions ne change rien à la logique. La différence principale avec le code de beaucoup d'entre vous, c'est le tableau qui contient les metadata/informations pour chaque type de cellule. Et justement, le int dans int* cells,  correspond à l'index de ce tableau. Donc si j'ai 0 (Ground) dans `cells[index]` alors je peux récupérer les informations avec `tileInfo[0]`.
 
 ```mermaid
 
@@ -132,11 +140,18 @@ classDiagram
 ### Où placer qu'elle fonction ?
 
 Pour débuter, je pense qu'il est plus simple de réfléchir de "bas en haut". Réfléchir aux fonctions des classes finales et "faire remonter" quand c'est en commun.
-Ce qui veux dire que si Warrior doit pouvoir se déplacer et donc, peut-être, appeller une fonction du style `void move(Vector2 dir)` et que c'est aussi le cas pour Mage... Alors Player peut avoir `void virtual move(Vector2 dir)`. Si l'intérieur de la fonction est la même entre Warrior et Mage, alors on peut juste écrire la logique dans Player et ne pas override dans les enfants. Si le contenu est différent alors vous pouvez forcer les enfants à implémenter leur propre logique avec `virtual void move(Vector2 dir) = 0`. Vous pouvez également écrire une première logique dans Player avec `virtual void move(Vector2 dir)`, qui sera `override` ou non dans chaque enfant.
+
+Ce qui veux dire que si **Warrior** doit pouvoir se déplacer et donc, peut-être, appeler une fonction du style `void move(Vector2 dir)` et que c'est aussi le cas pour **Mage**... Alors **Player** peut avoir `void virtual move(Vector2 dir)`. Si l'intérieur de la fonction est la même entre **Warrior** et **Mage**, alors on peut juste écrire la logique dans **Player** et ne pas override dans les enfants.
+
+Si le contenu est différent alors vous pouvez forcer les enfants à implémenter leur propre logique avec `virtual void move(Vector2 dir) = 0`. Vous pouvez également écrire une première logique dans Player avec `virtual void move(Vector2 dir)`, qui sera `override` ou non dans chaque enfant.
 
 ### A quel point découper les fonctions ?
 
-En dehors de la taille imposée, vous pouvez réfléchir avec les "spécialisations" de vos classes enfants. Par exemple, **Zombie** et **HeadlessZombie** on une logique de déplacement différente: le premier se déplace vers le joueur et le deuxième bouge aléatoirement. Si on repense à votre ancien code cela veut dire que l'un applique une certaine logique pour trouver la **direction** dans laquelle se déplacer et l'autre fais un rand pour choisir cette **direction**. Et comme vous **détestez** duppliquer du code, il faudrais que **le calcul de cette direction** soit la seule chose à écrire dans les classes filles. Vous avez donc besoin au minimun d'une fonction `Vector2 getDirection()` qui sera virtuelle pure dans Enemy et override dans les 2 classes filles.
+En dehors de la taille imposée, vous pouvez réfléchir avec les "spécialisations" de vos classes enfants. Par exemple, **Zombie** et **HeadlessZombie** on une logique de déplacement différente: le premier se déplace vers le joueur et le deuxième bouge aléatoirement.
+
+Si on repense à votre ancien code cela veut dire que l'un applique une certaine logique pour trouver la **direction** dans laquelle se déplacer et l'autre fais un rand pour choisir cette **direction**. Et comme vous **détestez** dupliquer du code, il faudrait que **le calcul de cette direction** soit la seule chose à écrire dans les classes filles.
+
+Vous avez donc besoin au minimum d'une fonction `Vector2 getDirection()` qui sera virtuelle pure dans **Enemy** et override dans les 2 classes filles.
 
 ### Un exemple avec le déplacement
 
@@ -162,12 +177,11 @@ Code simplifié en provenance du projet exemple :
 
 On peut donc voir que seule la fonction `characterMove` est identique entre les deux. On peut également se dire que les deux logiques ayant besoin des mêmes paramètres... une fonction `onUpdate` serait une bonne idée. Ce serait donc des candidats pour **Entity**.
 
-
 La même réflexion s'applique sur uniquement **Player** ou **Enemy**. **Warrior** et **Mage** vont tous les deux `readPlayerInputs` et `getDirection`, ce sont donc des candidats pour la classe **Player**.
 
+Cependant, **le Mage peut effectuer une action supplémentaire**. On pourrait donc vouloir spécialiser `readPlayerInputs`, avec un override chez le Mage pour écrire sa propre logique. Et si on veut éviter le code dupliqué alors on fait une première fonction qui s'occupe uniquement de **ZQSD** et l'autre de la touche **action**. Mais ce n'est pas la seule manière de penser.
 
-Cependant, **le Mage peut effectuer une action supplémentaire**. On pourrait donc vouloir spécialiser `readPlayerInputs`, avec un override chez le Mage pour écrire sa propre logique. Et si on veut éviter le code duppliqué alors on fait une première fonction qui s'occupe uniquement de **ZQSD** et l'autre de la touche **action**. Mais ce n'est pas la seule manière de penser. On peut également partir du principe que `readPlayerInputs` est une fonction qui "renvoie la touche appuyée" et qu'elle n'a pas à bloquer directement la "lecture" de la touche en fonction de **Warrior** ou **Mage**, cette dernière renverais donc également la touche **action** dans la classe du **Warrior** et ce serais dans `onUpdate` que on ferrais le traitement de l'action d'une manière différente entre **Warrior** et **Mage**.
-
+On peut également partir du principe que `readPlayerInputs` est une fonction qui "renvoie la touche appuyée" et qu'elle n'a pas à bloquer directement la "lecture" de la touche en fonction de **Warrior** ou **Mage**, cette dernière renverais donc également la touche **action** dans la classe du **Warrior** et ce serais dans `onUpdate` que on ferrais le traitement de l'action d'une manière différente entre **Warrior** et **Mage**.
 
 C'est le override de `onUpdate` que je vais mettre dans le schéma, mais vous pouvez faire comme bon vous semble.
 
@@ -201,14 +215,15 @@ bool characterMove(
 }
 ```
 Ca me permet de vous remettre sous les yeux la séparation de la logique de mouvement :
+
 - calcul de la nouvelle position théorique
 - check des bordures de la carte
-- check de si on peut aller sur la cellule (que la pluspart d'entre vous on fais avec une fonction comme vous n'aviez pas le tableau de cellInfos)
+- check de si on peut aller sur la cellule (que la plupart d'entre vous on fais avec une fonction comme vous n'aviez pas le tableau de cellInfos)
 - check si il y a pas quelqu'un déjà sur la cellule
 - appliquer la position si tout est passé
 
-
 De mon côté, characterMoveCollision (nom pas ouf) est complètement générique et n'a pas besoin d'être override.
+
 ```cpp
 bool characterMoveCollision(
     Character& character, Vector2& newPos,
@@ -234,11 +249,13 @@ bool characterMoveCollision(
 }
 ```
 
-Cette fonction applique une seule règle, si il y a un personnage du même type (Enemy ou Player) sur la ceullue, alors on ne peut pas y aller. Sinon il y a "contact".
-Et justement, dans le projet actuel, ce qui se passe à la collision dépend de votre classe finale. **Warrrior** fait **BOUM BOUM** et le **Mage** fait **AIE AIE** tandis que les **Enemy** meurt sur le coup. Certains font des dégâts et d'autres non ! Il y a plein de logiques différentes !
+Cette fonction applique une seule règle, si il y a un personnage du même type (Enemy ou Player) sur la cellule, alors on ne peut pas y aller. Sinon il y a "contact".
 
-C'est donc le moment d'introduire `onCollsion` ! Le suffixe **on** est un standard pour les fonctions qui se lancent **suite à un évènement du jeu**. Et notre `onCollision` va traduire la collision entre 2 entity : `void onCollision(Entity* other)`. Pourquoi il n'y a qu'un seule Entity en paramètre ? Parceque ce sera une fonction membre de Entity ! Ce qui reviens à dire que vous aller avoir cette logique : `Warrior->onCollision(Zombie)`. Et pour finir il est assez claire que on va vouloir pouvoir appliquer des dégâts à l'**Entity**, il faudrait donc au moins une fonction `void applyDamage(int)` directement disponible dans **Entity**.
+Et justement, dans le projet actuel, ce qui se passe à la collision dépend de votre classe finale. **Warrior** fait **BOUM BOUM** et le **Mage** fait **AIE AIE** tandis que les **Enemy** meurt sur le coup. Certains font des dégâts et d'autres non ! Il y a plein de logiques différentes !
 
+C'est donc le moment d'introduire `onCollision` ! Le suffixe **on** est un standard pour les fonctions qui se lancent **suite à un évènement du jeu**. Et notre `onCollision` va traduire la collision entre 2 entity : `void onCollision(Entity* other)`. Pourquoi il n'y a qu'un seule Entity en paramètre ? Parceque ce sera une fonction membre de Entity ! Ce qui reviens à dire que vous aller avoir cette logique : `Warrior->onCollision(Zombie)`.
+
+Et pour finir il est assez claire que on va vouloir pouvoir appliquer des dégâts à l'**Entity**, il faudrait donc au moins une fonction `void applyDamage(int)` directement disponible dans **Entity**.
 
 On s'arrête la pour l'exemple et voici le schéma récapitulatif et toujours non exhaustif:
 ```mermaid
@@ -293,15 +310,31 @@ classDiagram
 
     
     class Player{
+        - void onCollision() = 0
+        - void onUpdate() = 0
     }
     class Warrior{
+        - void onCollision() override
+        - void onUpdate() override
     }
     class Mage{
+        - void onCollision() override
+        - void onUpdate() override
+        - void castSpell()
     }
     class WarriorMage{
+        - ?
     }
 
 ```
+
+Sur le concept rien de bien compliquer : on veut que WarriorMage hérite de Warrior et de Mage pour obtenir la logique de collision du **Warrior** et l'activation du sort du **Mage**.
+
+Le premier problème est purement technique et est appelé le problème de l'héritage en diamant. En héritant de **Warrior** et **Mage**, notre **WarriorMage** se retrouve avec 
+les copies des fonctions de **Player**. C'est ici qu'entre en jeu [l'héritage virtuel](https://en.wikipedia.org/wiki/Virtual_inheritance). Ce n'est cependant pas une pratique recommandé.
+
+Et le deuxième problème, c'est que **Warrior** et **Mage** override `onCollision` rendant l'appel à la fonction ambigus sur **WarriorMage** pour le compilateur. Je vous laisse chercher la solution et non il n'y a pas besoin de créer une nouvelle fonction dans **Warrior** et il est interdit de copier le contenu de la fonction également.
+
 
 ### ZombieSwimmer (Composition by inheritance)
 
@@ -325,3 +358,27 @@ classDiagram
     }
 
 ```
+
+Le problème ici, c'est que l'on veut que un **Swimmer** puissent aller sur les cases d'eau. Sauf que cette logique est implémenté dans la function de movement déclaré dans **Entity**.
+
+#### Mais pas de soucis, je vais juste override la fonction move dans ZombieSwimmer
+
+Ah... Et à quel moment la class **Swimmer** est nécessaire/impactante dans ce cas ?
+
+#### Alors je vais mettre une variable dans Entity pour la capacité de nager que je vais la mettre à true dans le constructeur de **Swimmer**
+
+D'accord, mais qu'est-ce qui empêche n'importe qu'elle autre **Entity** de nager sans avoir **Swimmer** ?
+
+#### Euh... avec friend et private ?
+
+Wahhh, oui il y a un monde ou c'est possible.
+
+### Une "solution"
+
+Vous l'avez compris c'est pas si évident que ca. En réalité le plus direct serais que dans la fonction move, on puisse savoir si l'**Entity** en question hérite de **Swimmer**.
+
+Bienvenue dans le monde verbeux et pas performant de la réflexion du code à l'exécution (runtime). Il existe des outils qui permettent de décortiquer le type d'une variable et donc de faire des tests dessus. Enfin ce n'est pas vraiment le cas pour le C++ qui n'a jamais intégré ce genre de mécaniques runtime à son standard et c'est une version non-runtime qui voit le jour en C++26.
+
+Bref, je vais pas vous demander ca. Vous pouvez vous renseigner et tester pour l'expérience, mais on va se contenter de la "solution bête" d'avoir une variable dans **Entity** pour la capacité de se déplacer sur les case d'eau. Et la fonction qui gère l'oxygène et qui est dans **Swimmer** et bien on pourra l'appeler dans le override de `onUpdate` de **ZombieSwimmer**.
+
+Autrement dit, ajouter des fonctionnalités indépendantes c'est facile : on récupère les fonctions en héritant de la classe *nouvelle fonctionnalité* et il suffit alors de les appeler dans la classe qui hérite/ajoute cette fonctionnalité. Mais vouloir modifier un comportement existant comme ici, ce n'est pas réellement faisable avec vos outils actuels (et pas recommandé dans tous les cas).
