@@ -8,6 +8,8 @@
 L'objectif est de refaire le [précédent projet](https://github.com/HeartBeat-Games/Imperative-Programming-CPP) en orienté objet, avec quelques fonctionnalités supplémentaires. L'architecture du projet est imposée et disponible ci-dessous avec la description des nouvelles fonctionanlités.
 ![Project Architecture](Project/architecture.jpg)
 
+[Guide pour démarrer](ArchitectureGuide.md)
+
 ## Git flow
 
 La gestion de votre répertoire git est imposée de la manière suivante :
