@@ -72,6 +72,7 @@ Le travail de groupe permet d'introduire les conventions de code : [Convention p
 
 | Description | Potential Points |
 | --------------- | --------------- |
+| "Generated" code | -10 (by function) |
 | Line and character limit broken | -10 |
 | "Sphagetti" code | -10 (1 time max) |
 | Code convetion broken "heavily" | -5 (1 time max) |
