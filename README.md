@@ -87,5 +87,6 @@ Le travail de groupe permet d'introduire les conventions de code : [Convention p
 | NCurse integration (well done) | 5 |
 | State machine | 5 |
 | Design pattern outside Singleton | 2-3 |
+| Unit tests (code coverage > 50%) | 5 |
 
 **NCurse integration** *points depend of the features used*.
