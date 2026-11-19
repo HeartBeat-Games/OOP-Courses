@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ConsoleAdventureGame_OOP/ConsoleAdventureGame_OOP.vcxproj" Id="88bea375-ccd8-4c35-96a8-60fc0118638c" />
+</Solution>
